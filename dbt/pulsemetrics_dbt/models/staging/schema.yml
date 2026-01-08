@@ -1,0 +1,143 @@
+version: 2
+
+models:
+  - name: stg_users
+    description: "Staging model for users - cleaned and standardized user data"
+    columns:
+      - name: user_id
+        description: "Unique identifier for each user"
+        tests:
+          - unique
+          - not_null
+      - name: email
+        description: "User email address"
+        tests:
+          - not_null
+      - name: signup_date
+        description: "Date and time when user signed up"
+        tests:
+          - not_null
+      - name: is_activated
+        description: "Whether user completed activation process"
+      - name: acquisition_channel
+        description: "Marketing channel that acquired this user"
+
+  - name: stg_sessions
+    description: "Staging model for sessions - cleaned user session data"
+    columns:
+      - name: session_id
+        description: "Unique identifier for each session"
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: "Foreign key to users table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_users')
+              field: user_id
+      - name: session_start
+        description: "Session start timestamp"
+        tests:
+          - not_null
+      - name: duration_minutes
+        description: "Session duration in minutes"
+
+  - name: stg_events
+    description: "Staging model for events - cleaned user interaction events"
+    columns:
+      - name: event_id
+        description: "Unique identifier for each event"
+        tests:
+          - unique
+          - not_null
+      - name: session_id
+        description: "Foreign key to sessions table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_sessions')
+              field: session_id
+      - name: user_id
+        description: "Foreign key to users table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_users')
+              field: user_id
+      - name: event_type
+        description: "Type of event (page_view, button_click, etc.)"
+        tests:
+          - not_null
+      - name: event_timestamp
+        description: "When the event occurred"
+        tests:
+          - not_null
+
+  - name: stg_subscriptions
+    description: "Staging model for subscriptions - cleaned subscription lifecycle data"
+    columns:
+      - name: subscription_id
+        description: "Unique identifier for each subscription"
+        tests:
+          - unique
+          - not_null
+      - name: user_id
+        description: "Foreign key to users table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_users')
+              field: user_id
+      - name: plan
+        description: "Subscription plan type"
+        tests:
+          - not_null
+      - name: status
+        description: "Current subscription status"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['active', 'cancelled', 'trial_ended', 'upgraded']
+      - name: started_at
+        description: "When subscription started"
+        tests:
+          - not_null
+
+  - name: stg_payments
+    description: "Staging model for payments - cleaned payment transaction data"
+    columns:
+      - name: payment_id
+        description: "Unique identifier for each payment"
+        tests:
+          - unique
+          - not_null
+      - name: subscription_id
+        description: "Foreign key to subscriptions table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_subscriptions')
+              field: subscription_id
+      - name: user_id
+        description: "Foreign key to users table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_users')
+              field: user_id
+      - name: amount
+        description: "Payment amount"
+        tests:
+          - not_null
+      - name: status
+        description: "Payment status"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['succeeded', 'failed']
+      - name: payment_date
+        description: "When payment was processed"
+        tests:
+          - not_null
