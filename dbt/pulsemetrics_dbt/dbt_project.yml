@@ -1,0 +1,68 @@
+name: 'pulsemetrics_dbt'
+version: '1.0.0'
+config-version: 2
+
+# Project profile
+profile: 'pulsemetrics'
+
+# Directories
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Build artifacts
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Model configurations
+models:
+  pulsemetrics_dbt:
+    # Staging models
+    staging:
+      +materialized: view
+      +schema: staging
+      +tags: ['staging']
+    
+    # Marts models
+    marts:
+      core:
+        +materialized: table
+        +schema: analytics
+        +tags: ['marts']
+        
+        # Dimension tables
+        dim_users:
+          +tags: ['dimension']
+        dim_date:
+          +tags: ['dimension']
+        dim_plan:
+          +tags: ['dimension']
+        dim_channel:
+          +tags: ['dimension']
+        
+        # Fact tables
+        fct_events:
+          +tags: ['fact']
+        fct_sessions:
+          +tags: ['fact']
+        fct_subscriptions:
+          +tags: ['fact']
+        fct_payments:
+          +tags: ['fact']
+        fct_daily_metrics:
+          +tags: ['fact', 'metrics']
+
+# Test configurations
+tests:
+  +store_failures: true
+  +schema: test_results
+
+# Dispatch configuration
+dispatch:
+  - macro_namespace: dbt_utils
+    search_order: ['dbt_utils']
