@@ -1,26 +1,27 @@
 # PulseMetrics – Startup Analytics Platform
 
-A complete, production-ready analytics platform for SaaS startups, featuring synthetic data generation, data warehouse setup, and dbt-powered transformations.
+A complete analytics platform for SaaS startups, including synthetic data generation, data warehouse setup, dbt transformations, and business intelligence insights.
 
-## 🎯 Overview
+## 📋 Overview
 
-PulseMetrics provides end-to-end analytics infrastructure for tracking and analyzing key SaaS metrics including:
-- User acquisition and activation
-- Session and event analytics
-- Subscription lifecycle management
-- Revenue metrics (MRR, ARR, LTV)
-- Cohort analysis and retention tracking
+PulseMetrics provides:
+- **Synthetic Data Generation**: Realistic SaaS business data (users, sessions, events, subscriptions, payments)
+- **Data Warehouse**: PostgreSQL schemas and tables optimized for analytics
+- **dbt Transformations**: Staging models, dimension tables, fact tables, and metrics
+- **Business Insights**: Pre-built reports and metric definitions
 
-## 📁 Project Structure
+## 🏗️ Architecture
 
 ```
-pulsemetrics/
-├── data_generation/     # Python scripts to generate synthetic datasets
-├── warehouse/          # PostgreSQL schema and data loading scripts
-├── dbt/               # dbt transformations (staging + marts)
-├── docs/              # Metric definitions and documentation
-└── insights/          # Example reports and recommendations
+Data Generation (Python) → PostgreSQL (Raw Data) → dbt (Transformations) → Analytics Layer
 ```
+
+## 📊 Metrics Included
+
+- **User Metrics**: DAU, MAU, WAU, Activation Rate
+- **Retention**: Cohort analysis, churn rate
+- **Revenue**: MRR, ARR, LTV, ARPU
+- **Product**: Feature adoption, session depth
 
 ## 🚀 Quick Start
 
@@ -28,35 +29,29 @@ pulsemetrics/
 
 - Python 3.8+
 - PostgreSQL 12+
-- dbt-core 1.5+ with dbt-postgres adapter
+- pip (Python package manager)
 
-### Installation
+### Step 1: Setup Python Environment
 
-1. **Clone the repository**
 ```bash
+# Clone the repository
 git clone <your-repo-url>
 cd pulsemetrics
-```
 
-2. **Set up Python environment**
-```bash
-# Windows
+# Create virtual environment
 python -m venv venv
+
+# Activate virtual environment
+# On Windows:
 venv\Scripts\activate
+# On Mac/Linux:
+# source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 ```
 
-3. **Set up PostgreSQL database**
-```bash
-# Create database (run in psql or pgAdmin)
-CREATE DATABASE pulsemetrics;
-```
-
-## 📊 Step-by-Step Execution
-
-### Step 1: Generate Synthetic Data
+### Step 2: Generate Synthetic Data
 
 ```bash
 cd data_generation
@@ -65,63 +60,40 @@ python main.py
 
 This generates 5 CSV files in `data_generation/output/`:
 - `users.csv` (10,000 users)
-- `sessions.csv` (~50,000 sessions)
-- `events.csv` (~200,000 events)
-- `subscriptions.csv` (~3,000 subscriptions)
-- `payments.csv` (~15,000 payments)
+- `sessions.csv` (100,000+ sessions)
+- `events.csv` (500,000+ events)
+- `subscriptions.csv` (3,000+ subscriptions)
+- `payments.csv` (20,000+ payments)
 
-### Step 2: Set Up Data Warehouse
+### Step 3: Setup PostgreSQL Database
 
-1. **Create schemas and tables**
 ```bash
-# Connect to PostgreSQL
-psql -U postgres -d pulsemetrics
+# Create database
+psql -U postgres -c "CREATE DATABASE pulsemetrics;"
 
 # Run setup scripts
-\i warehouse/01_setup_schemas.sql
-\i warehouse/02_create_tables.sql
+psql -U postgres -d pulsemetrics -f warehouse/01_create_schemas.sql
+psql -U postgres -d pulsemetrics -f warehouse/02_create_tables.sql
+
+# Update file paths in 03_load_data.sql to match your system
+# Then load data
+psql -U postgres -d pulsemetrics -f warehouse/03_load_data.sql
 ```
 
-2. **Load data**
-```bash
-# Edit warehouse/03_load_data.sql to update file paths
-# Replace C:/path/to/pulsemetrics with your actual path
-# Then run:
-\i warehouse/03_load_data.sql
-```
+### Step 4: Setup dbt
 
-### Step 3: Run dbt Transformations
-
-1. **Configure dbt profile**
-
-Edit `dbt/pulsemetrics_dbt/profiles.yml` with your PostgreSQL credentials:
-
-```yaml
-pulsemetrics_dbt:
-  outputs:
-    dev:
-      type: postgres
-      host: localhost
-      user: postgres
-      password: your_password
-      port: 5432
-      dbname: pulsemetrics
-      schema: analytics
-      threads: 4
-  target: dev
-```
-
-2. **Run dbt**
 ```bash
 cd dbt/pulsemetrics_dbt
 
-# Install dependencies
+# Update profiles.yml with your PostgreSQL credentials
+
+# Install dbt packages
 dbt deps
 
 # Test connection
 dbt debug
 
-# Run models
+# Run transformations
 dbt run
 
 # Run tests
@@ -132,105 +104,149 @@ dbt docs generate
 dbt docs serve
 ```
 
-## 📈 Key Outputs
+## 📁 Project Structure
 
-### Dimension Tables (analytics schema)
-- `dim_users` - User master dimension
-- `dim_date` - Date dimension with fiscal periods
-- `dim_plan` - Subscription plan dimension
-- `dim_channel` - Marketing channel dimension
+```
+pulsemetrics/
+├── data_generation/     # Python scripts to generate synthetic data
+├── warehouse/           # SQL scripts for database setup
+├── dbt/                # dbt project with models and tests
+├── docs/               # Metric definitions and documentation
+└── insights/           # Business reports and recommendations
+```
 
-### Fact Tables (analytics schema)
-- `fct_events` - All user events with enriched context
-- `fct_sessions` - Session-level metrics
-- `fct_subscriptions` - Subscription lifecycle events
-- `fct_payments` - Payment transactions with status
-- `fct_daily_metrics` - Daily aggregated KPIs
+## 🎯 Key Features
 
-## 📚 Documentation
+### Data Generation
+- Realistic user behavior patterns
+- Multiple acquisition channels (Organic, Paid, Referral, Content)
+- Subscription lifecycle (trials, conversions, upgrades, cancellations)
+- Payment processing with realistic failure rates
+- Seasonal trends and growth patterns
 
-- **[Metric Definitions](docs/metric_definitions.md)** - Comprehensive definitions for all KPIs
-- **[CEO Weekly Report](insights/CEO_weekly_report.md)** - Example executive summary
-- **[Product Recommendations](insights/product_recommendations.md)** - Data-driven product insights
+### dbt Models
 
-## 🧪 Data Quality Tests
+**Staging Layer**: Clean and standardize raw data
+- `stg_users`, `stg_sessions`, `stg_events`, `stg_subscriptions`, `stg_payments`
 
-dbt tests cover:
-- Uniqueness constraints on primary keys
-- Not-null checks on critical fields
-- Referential integrity between facts and dimensions
-- Business logic validation (e.g., MRR > 0)
+**Dimension Tables**: Reference data
+- `dim_users`: User attributes and segmentation
+- `dim_date`: Date dimension with fiscal periods
+- `dim_plan`: Subscription plans
+- `dim_channel`: Acquisition channels
 
-## 🔧 Configuration
+**Fact Tables**: Metrics and measurements
+- `fct_events`: User interaction events
+- `fct_sessions`: Session-level metrics
+- `fct_subscriptions`: Subscription lifecycle
+- `fct_payments`: Payment transactions
+- `fct_daily_metrics`: Daily aggregated KPIs
 
-### Data Generation Parameters
+### Data Quality
+- dbt tests for data integrity (unique, not_null, relationships)
+- Schema validation
+- Referential integrity checks
 
-Edit `data_generation/config.py` to customize:
-- Number of users, sessions, events
-- Date ranges
-- Conversion rates
-- Churn rates
-- Revenue distributions
+## 📈 Sample Queries
 
-### dbt Configuration
-
-Edit `dbt/pulsemetrics_dbt/dbt_project.yml` to:
-- Change materialization strategies
-- Configure custom schemas
-- Adjust model tags and documentation
-
-## 📊 Sample Queries
-
+### Daily Active Users
 ```sql
--- Daily Active Users (DAU)
-SELECT date, dau FROM analytics.fct_daily_metrics
-WHERE date >= CURRENT_DATE - INTERVAL '30 days'
-ORDER BY date;
-
--- Monthly Recurring Revenue (MRR)
-SELECT date, mrr FROM analytics.fct_daily_metrics
-WHERE date = (SELECT MAX(date) FROM analytics.fct_daily_metrics);
-
--- User Activation Rate
 SELECT 
-    COUNT(DISTINCT CASE WHEN is_activated THEN user_id END)::FLOAT / 
-    COUNT(DISTINCT user_id) AS activation_rate
-FROM analytics.dim_users;
+    date,
+    daily_active_users,
+    weekly_active_users,
+    monthly_active_users
+FROM analytics.fct_daily_metrics
+ORDER BY date DESC
+LIMIT 30;
+```
 
--- 30-Day Retention by Cohort
+### MRR Trend
+```sql
 SELECT 
-    cohort_month,
-    retention_day_30
+    date_trunc('month', created_at) as month,
+    SUM(monthly_value) as mrr
+FROM analytics.fct_subscriptions
+WHERE status = 'active'
+GROUP BY month
+ORDER BY month;
+```
+
+### Cohort Retention
+```sql
+SELECT 
+    date_trunc('month', signup_date) as cohort_month,
+    COUNT(DISTINCT user_id) as cohort_size,
+    COUNT(DISTINCT CASE WHEN days_since_signup >= 30 THEN user_id END) as retained_30d
 FROM analytics.dim_users
-GROUP BY cohort_month, retention_day_30
+GROUP BY cohort_month
 ORDER BY cohort_month;
 ```
 
-## 🚢 Deployment Checklist
+## 📚 Documentation
 
-- [ ] Update `.gitignore` to exclude sensitive files
-- [ ] Remove or secure `profiles.yml` (contains credentials)
-- [ ] Update `README.md` with actual repository URL
-- [ ] Add environment variable support for credentials
-- [ ] Set up CI/CD for dbt (GitHub Actions, dbt Cloud, etc.)
-- [ ] Configure data freshness checks
-- [ ] Set up monitoring and alerting
-- [ ] Document backup and recovery procedures
-- [ ] Add data retention policies
-- [ ] Create runbook for common issues
+- **Metric Definitions**: See `docs/metric_definitions.md`
+- **CEO Weekly Report**: See `insights/CEO_weekly_report.md`
+- **Product Recommendations**: See `insights/product_recommendations.md`
+- **dbt Docs**: Run `dbt docs serve` for interactive documentation
 
-## 📝 License
+## 🧪 Testing
 
-MIT License - See LICENSE file for details
+```bash
+# Run all dbt tests
+cd dbt/pulsemetrics_dbt
+dbt test
+
+# Run specific test
+dbt test --select stg_users
+
+# Run tests for a model and its dependencies
+dbt test --select fct_daily_metrics+
+```
+
+## 🔄 Refresh Data
+
+To regenerate data with new patterns:
+
+```bash
+# Generate new data
+cd data_generation
+python main.py
+
+# Truncate existing tables
+psql -U postgres -d pulsemetrics -c "TRUNCATE raw.users, raw.sessions, raw.events, raw.subscriptions, raw.payments CASCADE;"
+
+# Reload data
+psql -U postgres -d pulsemetrics -f warehouse/03_load_data.sql
+
+# Re-run dbt models
+cd dbt/pulsemetrics_dbt
+dbt run
+```
 
 ## 🤝 Contributing
 
-Contributions welcome! Please read CONTRIBUTING.md for guidelines.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📧 Contact
+## 📝 License
 
-For questions or support, please open an issue on GitHub.
+This project is licensed under the MIT License.
 
----
+## 🆘 Support
 
-**Built with ❤️ for data-driven startups**
+For questions or issues:
+- Create an issue in the repository
+- Check the documentation in `/docs`
+- Review dbt documentation with `dbt docs serve`
+
+## 🎉 Acknowledgments
+
+Built with:
+- Python & Faker for data generation
+- PostgreSQL for data warehousing
+- dbt for analytics engineering
+- Modern analytics engineering best practices
